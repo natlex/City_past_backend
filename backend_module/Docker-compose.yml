@@ -1,27 +1,31 @@
 version: '3.5'
+networks:
+  lan:
+    driver: bridge
 services:
-  mysql:
+  docker-mysql:
     image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
     restart: always
-    hostname: localhost
     ports:
-      - 5432:5432
+      - '3308:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_USER: testuser
-      MYSQL_PASSWORD: testpass
-      MYSQL_DB: teste
-  server:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+    networks:
+      - lan
+  docker-server:
     image: spring-mysql
     build:
       context: ./
       dockerfile: Dockerfile
+    networks:
+      - lan
     depends_on:
-      - mysql
+      - docker-mysql
     ports:
-      - 8080:8080
-    environment:
-      - DATABASE_HOST=localhost
-      - DATABASE_USER=testuser
-      - DATABASE_NAME=teste
-      - DATABASE_PORT=5432
+      - '8091:8091'
